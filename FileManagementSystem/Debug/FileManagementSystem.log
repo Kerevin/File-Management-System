@@ -1,0 +1,5 @@
+﻿  main.cpp
+D:\Coding\HeDieuHanh\FileManagementSystem\FileManagementSystem\BootSector.h(59,20): warning C4018: '<': signed/unsigned mismatch
+D:\Coding\HeDieuHanh\FileManagementSystem\FileManagementSystem\BootSector.h(72,21): warning C4018: '<': signed/unsigned mismatch
+D:\Coding\HeDieuHanh\FileManagementSystem\FileManagementSystem\main.cpp(10,10): warning C4101: 'buffer': unreferenced local variable
+  FileManagementSystem.vcxproj -> D:\Coding\HeDieuHanh\FileManagementSystem\Debug\FileManagementSystem.exe
