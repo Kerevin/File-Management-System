@@ -23,5 +23,11 @@
     <ClInclude Include="BootSector.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="RDET.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="FileManagement.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
