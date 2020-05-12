@@ -1,9 +1,11 @@
 ﻿  main.cpp
-D:\Coding\HeDieuHanh\FileManagementSystem\FileManagementSystem\BootSector.h(40,18): warning C4244: '=': conversion from 'float' to 'int', possible loss of data
-D:\Coding\HeDieuHanh\FileManagementSystem\FileManagementSystem\BootSector.h(53,18): warning C4244: '=': conversion from 'float' to 'int', possible loss of data
-D:\Coding\HeDieuHanh\FileManagementSystem\FileManagementSystem\BootSector.h(61,20): warning C4018: '<': signed/unsigned mismatch
-D:\Coding\HeDieuHanh\FileManagementSystem\FileManagementSystem\BootSector.h(74,21): warning C4018: '<': signed/unsigned mismatch
-D:\Coding\HeDieuHanh\FileManagementSystem\FileManagementSystem\RDET.h(71,22): warning C4018: '<': signed/unsigned mismatch
+D:\Coding\HeDieuHanh\File-Management-System\FileManagementSystem\BootSector.h(43,18): warning C4244: '=': conversion from 'float' to 'int', possible loss of data
+D:\Coding\HeDieuHanh\File-Management-System\FileManagementSystem\BootSector.h(51,20): warning C4018: '<': signed/unsigned mismatch
+D:\Coding\HeDieuHanh\File-Management-System\FileManagementSystem\BootSector.h(64,21): warning C4018: '<': signed/unsigned mismatch
+D:\Coding\HeDieuHanh\File-Management-System\FileManagementSystem\RDET.h(64,21): warning C4018: '<': signed/unsigned mismatch
+D:\Coding\HeDieuHanh\File-Management-System\FileManagementSystem\RDET.h(72,23): warning C4018: '<': signed/unsigned mismatch
+D:\Coding\HeDieuHanh\File-Management-System\FileManagementSystem\RDET.h(113,22): warning C4018: '<': signed/unsigned mismatch
+D:\Coding\HeDieuHanh\File-Management-System\FileManagementSystem\RDET.h(124,22): warning C4018: '<': signed/unsigned mismatch
   The contents of <filesystem> are available only with C++17 or later.
-D:\Coding\HeDieuHanh\FileManagementSystem\FileManagementSystem\main.cpp(12,7): warning C4101: 'buffer': unreferenced local variable
-  FileManagementSystem.vcxproj -> D:\Coding\HeDieuHanh\FileManagementSystem\Debug\FileManagementSystem.exe
+D:\Coding\HeDieuHanh\File-Management-System\FileManagementSystem\main.cpp(11,7): warning C4101: 'buffer': unreferenced local variable
+  FileManagementSystem.vcxproj -> D:\Coding\HeDieuHanh\File-Management-System\Debug\FileManagementSystem.exe

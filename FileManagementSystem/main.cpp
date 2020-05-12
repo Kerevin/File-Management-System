@@ -2,8 +2,7 @@
 #include "RDET.h"
 #include <Windows.h>
 #include <filesystem>
-#include <sys/stat.h>
-
+#include <unordered_map>
 using namespace std;
 namespace fs = std::experimental::filesystem;
 void importFile(fstream& f, char* filename) {
@@ -56,23 +55,28 @@ void initializeFile(fstream& f, int volumeSize)
 	}
 }
 
-int main()
-{
-	RDET rd;
-	rd.get_all_files_names_within_folder("D:/Coding/HeDieuHanh/FileManagementSystem/FileManagementSystem");
+//int main()
+//{
+//	unordered_map<string, vector<int>> uniqueName;
+//	uniqueName["FILE"].push_back(5);
+//	cout << uniqueName["FILE"][0] << endl;
+//	
+//}
+
+int main() {
+    long volumeSize = 4;
+    BootSector bs (volumeSize);
+   
+    fstream f("test.re", ios::binary | ios::in);
+	initializeFile(f, volumeSize);
+	bs.createBootSector(f);
+	bs.readBootSector(f);
+	int rdOffset = bs.getRDETOffset();
+	int fatOffset = bs.getFATOffset();
+
+	RDET rd(bs.getRDETSize(), bs.getRDETOffset(), bs.getSectorSize());
+	rd.get_all_files_names_within_folder(f, "D:/Coding/HeDieuHanh/File-Management-System/Debug");
+	bs.printBootSector();
+    f.close();
 
 }
-
-//int main() {
-//    long volumeSize = 4;
-//    BootSector bs(volumeSize);
-//    RDET rd;
-//    fstream f("test.re", ios::binary | ios::in | ios::out);
-//   initializeFile(f, volumeSize);
-//   bs.createBootSector(f);
-//    
-//    bs.readBootSector(f);
-//   bs.printBootSector();
-//    f.close();
-//
-//}

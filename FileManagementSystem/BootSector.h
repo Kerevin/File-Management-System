@@ -26,19 +26,9 @@ private:
 	vector <long long> writeContent;
 
 public:
-	
 	BootSector()
 	{
-		volSize = 1;	
-		sectorSize = 512;
-		volSector = volSize * 1024 * 1024 / sectorSize;
-		clusterSize = 4096;
-		clusterSectors = clusterSize / sectorSize;
-		bootSize = 1;
-		entrySizeRDET = 512;
-		numFat = 1;
-		fatSize = round(float(this->volSector - this->bootSize - ((entrySizeRDET * 32) / sectorSize)) / (256 * this->clusterSectors + this->numFat));
-		
+
 	}
 	BootSector(long volSize)
 	{
@@ -94,6 +84,10 @@ public:
 		return bootSize;
 	}
 
+	int getSectorSize()
+	{
+		return sectorSize;
+	}
 	void printBootSector()
 	{
 		cout << "Volume size: " << volSize << " MB" << endl;
