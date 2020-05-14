@@ -32,9 +32,6 @@ void exportFile(fstream& f, char* filename) {
 	output.write(buffer, f.gcount());
 	output.close();
 }
-void readCluster(int numCluster, int bootSectorSize, int fatSize, int numFat, int numSectorsOfCluster) {
-	int clusterPosition = bootSectorSize + fatSize * numFat + (numCluster - 2) * numSectorsOfCluster;
-}
 
 void createBootSector(fstream& f, long volSize)
 {
@@ -57,26 +54,26 @@ void initializeFile(fstream& f, int volumeSize)
 
 //int main()
 //{
-//	unordered_map<string, vector<int>> uniqueName;
-//	uniqueName["FILE"].push_back(5);
-//	cout << uniqueName["FILE"][0] << endl;
-//	
+//	WIN32_FIND_DATA fd;
+//	string search_path = "D:/Coding/HeDieuHanh/FileManagementSystem/FileManagementSystem";
+//	HANDLE hFind = ::FindFirstFile(search_path.c_str(), &fd);
+//
 //}
 
 int main() {
-    long volumeSize = 4;
-    BootSector bs (volumeSize);
-   
-    fstream f("test.re", ios::binary | ios::in);
+	long volumeSize = 4;
+	BootSector bs(volumeSize);
+
+	fstream f("test.re", ios::binary | ios::out | ios::in);
 	initializeFile(f, volumeSize);
 	bs.createBootSector(f);
-	bs.readBootSector(f);
-	int rdOffset = bs.getRDETOffset();
-	int fatOffset = bs.getFATOffset();
+	//bs.readBootSector(f);
 
-	RDET rd(bs.getRDETSize(), bs.getRDETOffset(), bs.getSectorSize());
-	rd.get_all_files_names_within_folder(f, "D:/Coding/HeDieuHanh/File-Management-System/Debug");
-	bs.printBootSector();
-    f.close();
+	RDET rd(bs);
+
+	rd.addItem(f, "D:/Coding/HeDieuHanh/FileManagementSystem/FileManagementSystem/Debug", true);
+
+	//bs.printBootSector();
+	f.close();
 
 }

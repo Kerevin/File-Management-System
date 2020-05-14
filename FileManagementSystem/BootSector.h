@@ -21,8 +21,8 @@ private:
 	int entrySizeRDET; // SR: số entry của RDET, mặc định là 512 entry (Mỗi entry có 32 bytes)
 
 	// Vị trí của thông số quan trọng để ghi vào boot sector
-	vector <int> offset = {0xB, 0x3, 0xD, 0xE, 0x10, 0x11, 0x16, 0x20, 0x36, 0x1FE};
-	vector <int> numBytesWritten = {2,   8,   1,   2,    1,    2,    2,    4,    8,     2};	// số byte yêu cầu để ghi
+	vector <int> offset = { 0xB, 0x3, 0xD, 0xE, 0x10, 0x11, 0x16, 0x20, 0x36, 0x1FE };
+	vector <int> numBytesWritten = { 2,   8,   1,   2,    1,    2,    2,    4,    8,     2 };	// số byte yêu cầu để ghi
 	vector <long long> writeContent;
 
 public:
@@ -41,34 +41,40 @@ public:
 		entrySizeRDET = 512;
 		numFat = 1;
 		fatSize = round(float(this->volSector - this->bootSize - ((entrySizeRDET * 32) / sectorSize)) / (256 * this->clusterSectors + this->numFat));
-		
+
 	}
 
 
-	void createBootSector(fstream &f)
+	void createBootSector(fstream& f)
 	{
-		writeContent = { sectorSize, 'TSER',clusterSectors, bootSize, numFat, entrySizeRDET, fatSize, volSector, 2314885625596363078 /*Fat 16 */, 43605 /*kết thúc boot sector*/};
-		for (int i = 0; i<offset.size(); i++)
+		writeContent = { sectorSize, 'TSER',clusterSectors, bootSize, numFat, entrySizeRDET, fatSize, volSector, 2314885625596363078 /*Fat 16 */, 43605 /*kết thúc boot sector*/ };
+		for (int i = 0; i < offset.size(); i++)
 		{
 			f.seekg(offset[i], ios::beg);	// Seek đến offset quan trọng được lưu ở writePosition
-			f.write((char*) &writeContent[i], this->numBytesWritten[i]);	// Lưu giá trị quan trọng
+			f.write((char*)&writeContent[i], this->numBytesWritten[i]);	// Lưu giá trị quan trọng
 		}
 	}
 
 	void readBootSector(fstream& f)
 	{
-		int writePosition[] = { 0xB, 0xD, 0xE, 0x10, 0x11, 0x16, 0x20};
-		int numBytesWritten []= { 2,   1,   2,    1,    2,    2,    4};	// số byte yêu cầu để ghi
-		
-		vector<int*> content = { &sectorSize, &clusterSectors, &bootSize, &numFat, &entrySizeRDET, &fatSize, &volSector};
+		int writePosition[] = { 0xB, 0xD, 0xE, 0x10, 0x11, 0x16, 0x20 };
+		int numBytesWritten[] = { 2,   1,   2,    1,    2,    2,    4 };	// số byte yêu cầu để ghi
+
+		vector<int*> content = { &sectorSize, &clusterSectors, &bootSize, &numFat, &entrySizeRDET, &fatSize, &volSector };
 		for (int i = 0; i < content.size(); i++)
 		{
 			f.seekg(writePosition[i], ios::beg);
 			f.read((char*)&content[i], this->numBytesWritten[i]);
 		}
 	}
-
-
+	int getVolumeSize()
+	{
+		return this->volSector;
+	}
+	int getClusterSector()
+	{
+		return this->clusterSectors;
+	}
 	int getRDETOffset()
 	{
 		return this->bootSize + numFat * fatSize;

@@ -16,7 +16,7 @@ public:
 		bs = new BootSector(volSize);
 		rdOffset = bs->getRDETOffset();
 		fatOffset = bs->getFATOffset();
-		rd = new RDET(bs->getRDETSize ,rdOffset);
+		//rd = new RDET(bs->getRDETSize ,rdOffset);
 
 	}
 
