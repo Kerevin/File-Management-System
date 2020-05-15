@@ -90,9 +90,18 @@ public:
 		return bootSize;
 	}
 
+	int getNumFats()
+	{
+		return numFat;
+	}
 	int getSectorSize()
 	{
 		return sectorSize;
+	}
+
+	int getFATSize()
+	{
+		return fatSize;
 	}
 	void printBootSector()
 	{

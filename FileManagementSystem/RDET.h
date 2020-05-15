@@ -6,45 +6,18 @@
 #include <Windows.h>
 #include <algorithm>
 #include <unordered_map> 
-#include "BootSector.h"
+#include "FAT.h"
 using namespace std;
-struct Entry
-{
-	string fileName; // Tên tập tin, offset 0x0
-	string fileExtension; // Tên mở rộng, offset 0x8
-	string fileAttribute; // Thuộc tính tập tin, , offset 0xB (11)
-	char empty[14] = { "0" };	// Thông tin không quan trọng, một dãy 0 từ offset 0xC -> 0x10
-	short firstCluster; // Cluster bắt đầu, offset 0x1A (26)
-	int fileSize; // Kích thước tập tin, offset 0x1C (28)
-};
-struct SubEntry
-{
-	// Entry phụ lưu tên dài //
 
-	unsigned char orderNumber; // Thứ tự của entry (bắt đầu từ 1) - Kết thúc thường là 0xA (nếu chỉ có 1 entry phụ) hoặc 0xB (Nếu có hơn 2 entry phụ)
-	char fileName[8]; // Tên tập tin, offset 0x0
-	char fileExtension[3]; // Tên mở rộng, offset 0x8
-	unsigned char fileAttribute; // Thuộc tính tập tin, , offset 0xB (11)
-	char empty[14] = { "0" };	// Thông tin không quan trọng, một dãy 0 từ offset 0xC -> 0x10
-	short firstCluster; // Cluster bắt đầu, offset 0x1A (26)
-	int fileSize; // Kích thước tập tin, offset 0x1C (28)
-};
 class RDET
 {
 private:
 	int size;		 // Size của RDET, đơn vị sector
-	int offset;		// Offset của RDET 
+	int offset;		// Vị trí của RDET trong Volume
 	int sectorSize; // Size của mỗi sector
 	int clusterSize; // Số sector của cluster
 	int totalEmptyCluster; // Tổng số cluster trống
 public:
-
-	RDET(int size, int offset, int sectorSize)
-	{
-		this->size = size;
-		this->offset = offset;
-		this->sectorSize = sectorSize;
-	}
 	RDET(BootSector& bs)
 	{
 		this->size = bs.getRDETSize();
@@ -82,6 +55,40 @@ public:
 
 		return f;
 	}
+
+	string getSubEntry(string fileName) {
+		// Entry phụ để thể hiện tên dài
+		string n = ". ";
+		if (fileName.size() <= 29)
+		{
+			n += fileName;
+			for (int i = n.size(); i < 32; i++) {
+				n += " ";
+			}
+		}
+		else
+		{
+			n += fileName.substr(0, 30);
+			string m = fileName.substr(29, fileName.length());
+			n = getSubEntry(m) + n;
+
+		}
+		return n;
+	}
+
+	string handleFileName(WIN32_FIND_DATA fileName)
+	{
+		// Xử lý tên, loại bỏ file đuôi.
+		string newName = string(fileName.cFileName);
+		int fileExtentionPosition = string(fileName.cFileName).rfind('.');	// Tìm xem file đuôi ở đâu
+		if (fileExtentionPosition != -1)
+		{
+			newName = newName.substr(0, fileExtentionPosition);
+		}
+
+		return newName;
+	}
+
 	string getShortName(WIN32_FIND_DATA fileName)
 	{
 
@@ -100,6 +107,7 @@ public:
 		transform(newName.begin(), newName.end(), newName.begin(), ::toupper); // In hoa chữ cái
 		return newName;
 	}
+
 	vector<WIN32_FIND_DATA> processShortName(vector<WIN32_FIND_DATA> fileName)
 	{
 		for (int i = 0; i < fileName.size(); ++i)
@@ -110,7 +118,7 @@ public:
 	}
 
 
-	vector<string> get_all_files_names_within_folder(fstream& f, string folder, int pivotOffset)
+	vector<string> get_all_files_names_within_folder(fstream& f, string folder, int pivotOffset, vector<FAT>& fats)
 	{
 
 		vector<string> folderName;
@@ -140,23 +148,20 @@ public:
 			} while (::FindNextFile(hFind, &fd));
 			fileName.insert(fileName.end(), folderNameTemp.begin(), folderNameTemp.end());	// Gộp 2 mảng tên dài lại để tính toán tên ngắn cho tập tin và thư mục.
 			vector<WIN32_FIND_DATA> shortName = processShortName(fileName);
-			for (auto x : shortName)
-			{
-				cout << x.cFileName << endl;
-			}
+
 
 			for (int i = 0; i < shortName.size() - folderName.size(); i++)
 			{
 				// Ghi nội dung của file
-				addFile(f, fileName[i], readFileInfo(shortName[i], getFileExtension((string)fileName[i].cFileName)), pivotOffset);
-				//cout << readFileInfo(shortName[i], getFileExtension((string)fileName[i].cFileName)) << endl;
+				addFile(f, fileName[i], readFileInfo(shortName[i], getFileExtension((string)fileName[i].cFileName)), pivotOffset, fats, folder + "/" + string(fileName[i].cFileName));
+
 
 			}
 			for (int i = 0; i < folderName.size(); i++)
 			{
 				// Ghi nội dung của sub folders
-				addFolder(f, folder + "/" + folderName[i], readFileInfo(shortName[i + fileName.size() - 1], ""));
-				//get_all_files_names_within_folder(f, folder + "/" + string(folderName[i]), 0);
+				addFolder(f, folder + "/" + folderName[i], readFileInfo(shortName[i + fileName.size() - 1], ""), pivotOffset, fats);
+
 			}
 			::FindClose(hFind);
 		}
@@ -164,112 +169,163 @@ public:
 	}
 
 
-	void addFile(fstream& f, WIN32_FIND_DATA file, string shortNameInfo, int pivotOffset)
+	void addFile(fstream& f, WIN32_FIND_DATA file, string shortNameInfo, int pivotCluster, vector<FAT>& fats, string path)
 	{
-		/*Nếu là file của một sub folder thì có pivotOffset
-		pivotOffset = cluster bắt đầu của sub folder đó
+		/*Nếu là file của một sub folder thì có pivotCluster
+		pivotCluster = cluster bắt đầu nội dung (gồm các file/folder) của sub folder đó
 		*/
-		int limitSize = pivotOffset == 0 ? (this->size + this->offset) * sectorSize : totalEmptyCluster * clusterSize * sectorSize;
-		int currentOffset;
-		if (pivotOffset == 0)
+
+
+		int limitSize = pivotCluster == 0 ? (this->size + this->offset) * sectorSize : totalEmptyCluster * clusterSize * sectorSize;
+		int currentOffset;	// Vị trí trong bảng RDET để lưu nội dung của entry
+		if (pivotCluster == 0)
 			currentOffset = this->offset * this->sectorSize; // Offset hiện tại
 		else
-			currentOffset = getCluster(pivotOffset) * this->sectorSize;
+			currentOffset = getCluster(pivotCluster) * this->sectorSize;
 		bool emptyEntry = false;
 
+
+		cout << "Dang ghi file: " << shortNameInfo << "cluster thứ: " << pivotCluster << endl;
+
 		// Kiếm chỗ trống để ghi Entry
+		char currentValue[2]; // Giá trị ở vị trí currentOffset
 		while (currentOffset < limitSize && !emptyEntry)
 		{
 			f.seekg(currentOffset, ios::beg);
-			char currentValue[5];
-			f.read((char*)&currentValue, 4);
-			currentValue[4] = '\0';
-			if (string(currentValue) == "")
+
+			f.read((char*)&currentValue, 1);
+			currentValue[1] = '\0';
+
+			if (string(currentValue) == "") // Phát hiện chỗ trống
 			{
 				emptyEntry = true;
 			}
 			else
-				currentOffset += 32;
-		}
-		cout << "Current offset: " << currentOffset << ", empty: " << emptyEntry << endl;
-		vector<int> allAvailableCluster; // Cluster trống để lưu nội dung file
-		if (emptyEntry)
-		{
-			f.seekg(currentOffset, ios::beg);
-			// Đi tìm cluster trống để ghi nội dung file
-			for (int k = 2; k <= totalEmptyCluster; k++)
 			{
-				int firstOffset; // Offset đầu của cluster đó
-				f.seekg(this->getCluster(k) * sectorSize);	// Nhảy tới offset của cluster k
-				f.read((char*)&firstOffset, 4);
-				if (firstOffset == 0 || firstOffset == 0xE5)
-				{
-					allAvailableCluster.push_back(k);
-
-					// Kiểm tra xem dung lượng file có vượt qua n cluster hay chưa?
-					// allAvailableCluster.size() * clusterSize * sectorSize là tính số byte hiện tại đã lưu được của file
-					if ((file.nFileSizeHigh * MAXDWORD) + file.nFileSizeLow <= allAvailableCluster.size() * clusterSize * sectorSize)
-					{
-						break;
-					}
-				}
+				currentOffset += 32;
+				//cout << "Value: " << string(currentValue) << ", offset: " << currentOffset << endl;
 			}
 
-
 		}
 
-		if (allAvailableCluster.size() > 0)
+		//cout << "Current offset: " << currentOffset << ", empty: " << emptyEntry << ", current value: " << string(currentValue) << endl;
+
+		vector<int> availableClusters = fats[0].findEmptyOffsets(f, file);	// Các cluster trống phù hợp cho file
+
+		cout << "So cluster phai ghi vao: " << availableClusters.size() << endl;
+		// Ghi thông tin file vào Entry
+		if (emptyEntry)
 		{
-			cout << "GHI VAO OFFSET: " << currentOffset << ", file: " << shortNameInfo << endl;
-			// Ghi entry;
+			fats[0].writeFAT(f, availableClusters);
+			if (!(file.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY))
+				writeFileContent(f, availableClusters, path);
+
+			cout << "GHI VAO OFFSET: " << currentOffset << ", file: " << file.cFileName << endl;
+			// Nhảy tới vị trí thích hợp của entry
 			f.seekg(currentOffset, ios::beg);
-			//cout << shortNameInfo << endl;
-			char temp[27];	// mảng char tạm ghi vào entry
+
+
+			string fullName = handleFileName(file); // Lấy tên full (loại bỏ file đuôi) 
+
+			if (fullName.size() > 8) // Nếu tên dài hơn 8 ký tự sẽ phát sinh entry phụ
+			{
+				string subEntry = getSubEntry(fullName);
+
+				// Ghi entry phụ vào file
+				for (int i = 0; i < subEntry.size(); i += 32)
+				{
+					char temp[33]; // mảng char tạm để chép nội dung string sang char
+					strcpy_s(temp, subEntry.substr(i, i + 32).c_str());
+					f.write((char*)&temp, 32);
+				}
+
+			}
+
+			char temp[27];	 // mảng char tạm để chép nội dung string sang char
 			strcpy_s(temp, shortNameInfo.c_str());
-			//cout << temp << endl;
+
 			f.write((char*)&temp, 26);
-			//cout << f.tellg() << endl;
+
 			// Ghi cluster bắt đầu
-			f.write((char*)&allAvailableCluster[0], 2);
-			//cout << allAvailableCluster[0] << endl;
-			// Ghi file size
+			f.write((char*)&availableClusters[0], 2);
+
+			// Ghi file size vào volume
 			int fileSize = getFileSize(file);
 			f.write((char*)&fileSize, 4);
 
 
 		}
+		if (f.bad())
+		{
+			cout << "BAD WRITING! FILE: " << shortNameInfo << endl;
+			f.clear();
+			return;
+		}
+		cout << endl;
 	}
-	void addFolder(fstream& f, string folder, string shortName)
+
+	void addFolder(fstream& f, string folder, string shortName, int startCluster, vector<FAT>& fats)
 	{
 		WIN32_FIND_DATA fd;
 
 		HANDLE hFind = ::FindFirstFile(folder.c_str(), &fd);
-		strcpy_s(fd.cFileName, string(fd.cFileName).substr(0, 5).c_str());
-		addFile(f, fd, shortName, 0);
-		cout << "Hello, folder: " << f.tellg() << endl;
-		f.seekg(-6, ios::cur);
-		cout << ", offset" << f.tellg() << endl;
+
+		addFile(f, fd, shortName, startCluster, fats, folder);
+		cout << "Hello, folder: " << fd.cFileName << "-----------------" << endl;
+		f.seekp(-6, ios::cur);	// Nhảy tới vị trí cluster đầu
+
+
 		short firstClusterOfFoler;
 		f.read((char*)&firstClusterOfFoler, 2);
-		cout << "Cluter bd: " << int(firstClusterOfFoler) << ", offset" << f.tellg() << endl;
-		get_all_files_names_within_folder(f, folder, firstClusterOfFoler);
+		cout << "Cluter bd: " << firstClusterOfFoler << ", offset" << f.tellg() << endl;
+
+
+		get_all_files_names_within_folder(f, folder, firstClusterOfFoler, fats);
 	}
 
-	void addItem(fstream& f, string item, bool isFolder)
+	void addItem(fstream& f, string item, bool isFolder, vector<FAT>& fats)
 	{
 		/*Hàm thêm một item vào vol
-		isFolder: True nếu item dc thêm vào là 1 folder, ngược lại là thêm vào 1 file
-		*/
+		isFolder: True nếu item dc thêm vào là 1 folder, ngược lại là thêm vào 1 file   */
+
 		if (isFolder)
 		{
-			get_all_files_names_within_folder(f, item, 0);
+			get_all_files_names_within_folder(f, item, 0, fats);
 		}
 		else {
 
 		}
 	}
 
+	void writeFileContent(fstream& f, vector<int> clustersOffset, string path)
+	{
+		fstream file(path, ios::binary | ios::in);
+		cout << "FILE PATH: " << path << endl;
+		char* buffer = new char[clusterSize * sectorSize];
+		for (auto x : clustersOffset)
+		{
+			int offset = getCluster(x);
+			f.seekg(offset, ios::beg);
+			file.read(buffer, int(clusterSize * sectorSize));
+			char temp[1025];
+			cout << "ND file: " << buffer << endl;
+			int i = 0;
+			while (i < strlen(buffer))
+			{
+				if (strlen(buffer) - 1024 > i)
+				{
+					strcpy_s(temp, string(buffer).substr(i, i + 1024).c_str());
+				}
+				else {
+					strcpy_s(temp, string(buffer).substr(i).c_str());
+				}
+				f.write(temp, 1024);
+				i += 1024;
+			}
+		}
+		f.close();
 
+	}
 	int getCluster(int k) {
 
 		return this->offset + this->size + (k - 2) * clusterSize;

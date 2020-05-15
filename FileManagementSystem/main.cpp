@@ -70,10 +70,14 @@ int main() {
 	//bs.readBootSector(f);
 
 	RDET rd(bs);
+	vector<FAT> nFat;
+	for (int i = 0; i < bs.getNumFats(); i++)
+	{
+		FAT f(bs, i);
+		nFat.push_back(f);
+	}
+	rd.addItem(f, "D:/Coding/HeDieuHanh/FileManagementSystem/FileManagementSystem/Debug", true, nFat);
 
-	rd.addItem(f, "D:/Coding/HeDieuHanh/FileManagementSystem/FileManagementSystem/Debug", true);
-
-	//bs.printBootSector();
 	f.close();
 
 }
