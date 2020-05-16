@@ -1,27 +1,9 @@
-﻿#include "BootSector.h"
-#include "RDET.h"
+﻿#include "RDET.h"
 #include <Windows.h>
-#include <filesystem>
 #include <unordered_map>
 using namespace std;
-namespace fs = std::experimental::filesystem;
-void importFile(fstream& f, char* filename) {
-	fstream output;
-	output.open(filename, ios::binary | ios::out);
-	char buffer[1024];
-	f.seekg(0, ios::end);
-	long long size = f.tellg();
-	f.seekg(0, ios::beg);
-	/*
-	while(of.read(buffer, sizeof(buffer)))
-		{
 
-			output.write(buffer, of.gcount());
-		}
-	output.write(buffer, of.gcount());
-	*/
-	output.close();
-}
+
 void exportFile(fstream& f, char* filename) {
 	fstream output;
 	output.open(filename, ios::binary | ios::out);
@@ -64,19 +46,21 @@ int main() {
 	long volumeSize = 4;
 	BootSector bs(volumeSize);
 
-	fstream f("test.re", ios::binary | ios::out | ios::in);
+	fstream f("test.re", ios::binary | ios::in | ios::out);
+	if (f.fail())
+	{
+		cout << "FAILED TO OPEN FILE " << endl;
+		f.close();
+		return 0;
+	}
 	initializeFile(f, volumeSize);
 	bs.createBootSector(f);
-	//bs.readBootSector(f);
+	//bs.printBootSector();
 
 	RDET rd(bs);
-	vector<FAT> nFat;
-	for (int i = 0; i < bs.getNumFats(); i++)
-	{
-		FAT f(bs, i);
-		nFat.push_back(f);
-	}
-	rd.addItem(f, "D:/Coding/HeDieuHanh/FileManagementSystem/FileManagementSystem/Debug", true, nFat);
+	FAT fat(bs);
+
+	rd.addItem(f, "D:/Stuff/testvolume", true, fat, true);
 
 	f.close();
 
