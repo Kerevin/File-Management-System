@@ -20,14 +20,15 @@ private:
 	int entrySizeRDET; // SR: số entry của RDET, mặc định là 512 entry (Mỗi entry có 32 bytes)
 	int currentVolSector; // Số sector còn lại của volume;
 	// Vị trí của thông số quan trọng để ghi vào boot sector
-	vector <int> offset = { 0xB, 0x3, 0xD, 0xE, 0x11, 0x16, 0x20, 0x36, 0x40, 0x1FE };
-	vector <int> numBytesWritten = { 2, 8, 1, 2, 1, 2, 4, 8, 4, 2 };	// số byte yêu cầu để ghi
+	vector <int> offset = {  /**/  0xB, 0x3, 0xD, 0xE, 0x10, 0x16, 0x20, 0x36, 0x40, 0x1FE };
+	vector <int> numBytesWritten = { 2,   8,   1,   2,    4,    2,    4,    8,    4,     2 };	// số byte yêu cầu để ghi
 	vector <long long> writeContent;
 
 public:
 	BootSector()
 	{
-
+		this->entrySizeRDET = 512;
+		clusterSize = 4096;
 	}
 	BootSector(int volSize)
 	{
@@ -47,6 +48,7 @@ public:
 	void createBootSector(fstream& f)
 	{
 		writeContent = { sectorSize, 'TSER',clusterSectors, bootSize, entrySizeRDET, fatSize, volSector, 2314885625596363078 /*Fat 16 */, currentVolSector, 43605 /*kết thúc boot sector*/ };
+
 		for (int i = 0; i < offset.size(); i++)
 		{
 			f.seekg(offset[i], ios::beg);	// Seek đến offset quan trọng được lưu ở writePosition
@@ -56,17 +58,28 @@ public:
 
 	void readBootSector(fstream& f)
 	{
-		int writePosition[] = { 0xB, 0xD, 0x10, 0x11, 0x16, 0x20, 0x40 };
-		int numBytesWritten[] = { 2,   1,    1,    2,    2,    4,    4 };	// số byte yêu cầu để ghi
+		int writePosition[] = { 0xB, 0xD, 0xE,0x16, 0x20, 0x40 };
+		int numBytes[] = { 2,   1,    1,    2,    4,    4 };	// số byte yêu cầu để ghi
 
-		vector<int*> content = { &sectorSize, &clusterSectors, &bootSize, &entrySizeRDET, &fatSize, &volSector, &currentVolSector };
+
+		vector<int*> content = { &this->sectorSize,&this->clusterSectors,&this->bootSize,&this->fatSize,&this->volSector, &this->currentVolSector };
+
+
+
 		for (int i = 0; i < content.size(); i++)
 		{
-			f.seekg(writePosition[i], ios::beg);
-			f.read((char*)&content[i], this->numBytesWritten[i]);
+
+			f.seekp(writePosition[i], ios::beg);
+			f.read((char*)content[i], numBytes[i]);
+
 		}
-		volSize = volSector * sectorSize;
+		volSize = volSector / sectorSize / 4;
+
+
 	}
+
+
+
 	int getVolumeSize()
 	{
 		return this->volSector;

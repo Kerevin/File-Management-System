@@ -30,10 +30,10 @@ public:
 
 	vector<int> findEmptyOffsets(fstream& f, WIN32_FIND_DATA file, long sizeFize)
 	{
-		int currentOffset = this->offset * sectorSize + 2;
+		int currentOffset = this->offset * sectorSize + 2;	// Offset bắt đầu của bảng FAT, tính bằng bytes
 		bool isFull = false;
-		vector<int> emptyOffset;
-		cout << "FILE SIZE: " << sizeFize << endl;
+		vector<int> emptyOffset;	// Lưu lại tất cả offset có thể của item truyền vào
+
 		while (!isFull && (currentOffset - this->offset * sectorSize) < (size * sectorSize))
 		{
 			f.seekp(currentOffset, ios::beg);
@@ -44,7 +44,7 @@ public:
 			{
 				emptyOffset.push_back((currentOffset - this->offset * sectorSize) / 2 + 1); // Lưu vị trí trong bảng FAT dưới số thứ tự cluster
 
-				if (sizeFize <= emptyOffset.size() * clusterSize * sectorSize)
+				if (sizeFize <= emptyOffset.size() * clusterSize * sectorSize)	// Kiểm tra xem chứa đủ item chưa, nếu chưa thì kiếm tiếp 1 cluster, đủ thì thôi
 				{
 					isFull = true;
 				}
@@ -52,26 +52,60 @@ public:
 
 			currentOffset += 2;
 		}
-		cout << "CLUSTER BAT DAU: " << emptyOffset[0] << endl;
+
 		return emptyOffset;
 	}
-	void writeFAT(fstream& f, vector<int> offsets)
+	void writeFAT(fstream& f, vector<int> clusters)
 	{
-		int currentOffset = this->offset * sectorSize + (offsets[0] - 1) * 2; // Vị trí hiện tại để theo dõi giá trị trong bảng FAT
-		cout << currentOffset << endl;
+		int currentOffset = this->offset * sectorSize + (clusters[0] - 1) * 2; // Vị trí hiện tại để theo dõi giá trị trong bảng FAT
 
-		if (offsets.size() > 1)
-			for (int i = 1; i < offsets.size() - 1; ++i)
+
+		if (clusters.size() > 1)
+			for (int i = 1; i < clusters.size() - 1; ++i)
 			{
 				f.seekg(currentOffset, ios::beg);
-				f.write((char*)&offsets[i], 2);
-				currentOffset = this->offset * sectorSize + (offsets[i] - 1) * 2;
+				clusters[i] = (clusters[i] - 1) * 2;	// offset trong bảng FAT của cluster k = (cluster k - 1 ) * 2
+				f.write((char*)&clusters[i], 2);
+				currentOffset = this->offset * sectorSize + clusters[i];
 
 			}
 		f.seekg(currentOffset, ios::beg);
-		char eof[3] = "FF";
-		f.write(eof, 2);
+		short eof = 255;
+		f.write((char*)&eof, 2);
 
 	}
+	vector<int> getItemClusters(fstream& f, int clusterK)
+	{
 
+		// Hàm để lấy tất cả vị trí cluster của một item có cluster bắt đầu là cluster K
+		int currentOffset = this->offset * sectorSize + (clusterK - 1) * 2; // Suy từ cluster K sang offset trong FAT
+		f.seekg(currentOffset, ios::beg);
+		bool isFull = false;
+		vector<int> cluster;
+		cluster.push_back(clusterK);
+
+
+		while (!isFull)
+		{
+			short value;
+
+			f.read((char*)&value, 2);
+			if (value == 255)
+			{
+				isFull = true;
+				if (cluster.size() > 1)
+				{
+					cluster.push_back((currentOffset - this->offset * sectorSize) / 2 + 1);
+				}
+			}
+			else {
+				cluster.push_back(value / 2 + 1);
+				currentOffset = this->offset * sectorSize + value;
+				f.seekp(currentOffset, ios::beg);
+			}
+
+		}
+
+		return cluster;
+	}
 };

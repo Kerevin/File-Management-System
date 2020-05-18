@@ -1,4 +1,5 @@
 ﻿#include "RDET.h"
+#include "FileManagement.h"
 #include <Windows.h>
 #include <unordered_map>
 using namespace std;
@@ -34,34 +35,60 @@ void initializeFile(fstream& f, int volumeSize)
 	}
 }
 
-//int main()
-//{
-//	WIN32_FIND_DATA fd;
-//	string search_path = "D:/Coding/HeDieuHanh/FileManagementSystem/FileManagementSystem";
-//	HANDLE hFind = ::FindFirstFile(search_path.c_str(), &fd);
-//
-//}
+void createNewVolume(fstream& f, long volumeSize, BootSector& bs)
+{
 
-int main() {
-	long volumeSize = 4;
-	BootSector bs(volumeSize);
-
-	fstream f("test.re", ios::binary | ios::in | ios::out);
-	if (f.fail())
-	{
-		cout << "FAILED TO OPEN FILE " << endl;
-		f.close();
-		return 0;
-	}
 	initializeFile(f, volumeSize);
 	bs.createBootSector(f);
-	//bs.printBootSector();
-
-	RDET rd(bs);
-	FAT fat(bs);
-
-	rd.addItem(f, "D:/Stuff/testvolume", true, fat, true);
-
-	f.close();
+}
+int main()
+{
+	int ch;
+	cout << "1. Open volume" << endl;
+	cout << "2. Create new volume" << endl;
+	do {
+		cout << ">> ";
+		cin >> ch;
+	} while (ch > 2 || ch < 0);
+	cin.ignore(1);
+	system("cls");
+	if (ch == 2)
+	{
+		long volumeSize;
+		cout << "Enter size of volume(MB): ";
+		cin >> volumeSize;
+		cin.ignore(1);
+		FileManagement fm(volumeSize, "test.re");
+		fm.showMenu();
+	}
+	else {
+		FileManagement fm("test.re");
+		fm.showMenu();
+	}
 
 }
+//int main() {
+//	long volumeSize = 4;
+//	BootSector bs(4);
+//
+//	fstream f("test.re", ios::binary | ios::in | ios::out);
+//	if (f.fail())
+//	{
+//		cout << "FAILED TO OPEN FILE " << endl;
+//		f.close();
+//		return 0;
+//	}
+//	//bs.readBootSector(f);
+//	//createNewVolume(f, volumeSize, bs);
+//	//bs.printBootSector();
+//	RDET rd(bs);
+//	FAT fat(bs);
+//
+//	//rd.addItem(f, "D:/Stuff/testvolume", true, fat, false);
+//	rd.showFolder(f, fat);
+//	cout << endl;
+//
+//
+//
+//	f.close();
+

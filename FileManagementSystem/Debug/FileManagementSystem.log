@@ -1,15 +1,22 @@
 ﻿  main.cpp
-D:\Coding\HeDieuHanh\FileManagementSystem\FileManagementSystem\BootSector.h(41,18): warning C4244: '=': conversion from 'float' to 'int', possible loss of data
-D:\Coding\HeDieuHanh\FileManagementSystem\FileManagementSystem\BootSector.h(50,21): warning C4018: '<': signed/unsigned mismatch
-D:\Coding\HeDieuHanh\FileManagementSystem\FileManagementSystem\BootSector.h(63,21): warning C4018: '<': signed/unsigned mismatch
+D:\Coding\HeDieuHanh\FileManagementSystem\FileManagementSystem\BootSector.h(42,18): warning C4244: '=': conversion from 'float' to 'int', possible loss of data
+D:\Coding\HeDieuHanh\FileManagementSystem\FileManagementSystem\BootSector.h(52,21): warning C4018: '<': signed/unsigned mismatch
+D:\Coding\HeDieuHanh\FileManagementSystem\FileManagementSystem\BootSector.h(69,21): warning C4018: '<': signed/unsigned mismatch
 D:\Coding\HeDieuHanh\FileManagementSystem\FileManagementSystem\FAT.h(47,18): warning C4018: '<=': signed/unsigned mismatch
 D:\Coding\HeDieuHanh\FileManagementSystem\FileManagementSystem\FAT.h(64,22): warning C4018: '<': signed/unsigned mismatch
-D:\Coding\HeDieuHanh\FileManagementSystem\FileManagementSystem\RDET.h(265,45): warning C4566: character represented by universal-character-name '\u1EE9' cannot be represented in the current code page (1258)
-D:\Coding\HeDieuHanh\FileManagementSystem\FileManagementSystem\RDET.h(291,12): warning C4566: character represented by universal-character-name '\u1EE7' cannot be represented in the current code page (1258)
-D:\Coding\HeDieuHanh\FileManagementSystem\FileManagementSystem\RDET.h(49,60): warning C4018: '<': signed/unsigned mismatch
-D:\Coding\HeDieuHanh\FileManagementSystem\FileManagementSystem\RDET.h(189,22): warning C4018: '<': signed/unsigned mismatch
-D:\Coding\HeDieuHanh\FileManagementSystem\FileManagementSystem\RDET.h(195,22): warning C4018: '<': signed/unsigned mismatch
-D:\Coding\HeDieuHanh\FileManagementSystem\FileManagementSystem\RDET.h(235,22): warning C4018: '<': signed/unsigned mismatch
-D:\Coding\HeDieuHanh\FileManagementSystem\FileManagementSystem\RDET.h(241,22): warning C4018: '<': signed/unsigned mismatch
-D:\Coding\HeDieuHanh\FileManagementSystem\FileManagementSystem\RDET.h(325,23): warning C4018: '<': signed/unsigned mismatch
+D:\Coding\HeDieuHanh\FileManagementSystem\FileManagementSystem\RDET.h(71,12): warning C4566: character represented by universal-character-name '\u1EE7' cannot be represented in the current code page (1258)
+D:\Coding\HeDieuHanh\FileManagementSystem\FileManagementSystem\RDET.h(103,23): warning C4018: '<': signed/unsigned mismatch
+D:\Coding\HeDieuHanh\FileManagementSystem\FileManagementSystem\RDET.h(172,60): warning C4018: '<': signed/unsigned mismatch
+D:\Coding\HeDieuHanh\FileManagementSystem\FileManagementSystem\RDET.h(197,21): warning C4018: '<': signed/unsigned mismatch
+D:\Coding\HeDieuHanh\FileManagementSystem\FileManagementSystem\RDET.h(374,22): warning C4018: '<': signed/unsigned mismatch
+D:\Coding\HeDieuHanh\FileManagementSystem\FileManagementSystem\RDET.h(380,22): warning C4018: '<': signed/unsigned mismatch
+D:\Coding\HeDieuHanh\FileManagementSystem\FileManagementSystem\RDET.h(420,22): warning C4018: '<': signed/unsigned mismatch
+D:\Coding\HeDieuHanh\FileManagementSystem\FileManagementSystem\RDET.h(426,22): warning C4018: '<': signed/unsigned mismatch
+D:\Coding\HeDieuHanh\FileManagementSystem\FileManagementSystem\RDET.h(497,21): warning C4018: '<': signed/unsigned mismatch
+D:\Coding\HeDieuHanh\FileManagementSystem\FileManagementSystem\RDET.h(676,21): warning C4018: '<': signed/unsigned mismatch
+D:\Coding\HeDieuHanh\FileManagementSystem\FileManagementSystem\RDET.h(693,16): warning C4018: '>': signed/unsigned mismatch
+D:\Coding\HeDieuHanh\FileManagementSystem\FileManagementSystem\RDET.h(708,16): warning C4018: '>': signed/unsigned mismatch
+D:\Coding\HeDieuHanh\FileManagementSystem\FileManagementSystem\RDET.h(672,7): warning C4101: 'sizeF': unreferenced local variable
+D:\Coding\HeDieuHanh\FileManagementSystem\FileManagementSystem\RDET.h(673,9): warning C4101: 'firstCluster': unreferenced local variable
+D:\Coding\HeDieuHanh\FileManagementSystem\FileManagementSystem\FileManagement.h(93,21): warning C4018: '<': signed/unsigned mismatch
   FileManagementSystem.vcxproj -> D:\Coding\HeDieuHanh\FileManagementSystem\Debug\FileManagementSystem.exe
