@@ -55,6 +55,7 @@ public:
 
 		return emptyOffset;
 	}
+
 	void writeFAT(fstream& f, vector<int> clusters)
 	{
 		int currentOffset = this->offset * sectorSize + (clusters[0] - 1) * 2; // Vị trí hiện tại để theo dõi giá trị trong bảng FAT
@@ -74,6 +75,7 @@ public:
 		f.write((char*)&eof, 2);
 
 	}
+
 	vector<int> getItemClusters(fstream& f, int clusterK)
 	{
 
@@ -107,5 +109,20 @@ public:
 		}
 
 		return cluster;
+	}
+
+	void deleteItem(fstream& f, int clusterK)
+	{
+		vector<int> allClusters = getItemClusters(f, clusterK);
+		int currentOffset;
+		int zero = 0;
+		for (auto cluster : allClusters)
+		{
+			currentOffset = (cluster - 1) * 2 + (this->offset * sectorSize);	// Chuyển từ cluster thứ K sang offset trong FAT
+
+			f.seekg(currentOffset, ios::beg);
+			f.write((char*)&zero, 2);
+		}
+
 	}
 };

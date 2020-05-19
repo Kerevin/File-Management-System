@@ -92,10 +92,10 @@ public:
 		}
 		for (int i = 0; i < allItems.size(); i++)
 		{
-			cout << i + 1 << ". " << allItems[i].name;
+			cout << i + 1 << ". " << rd->handleItemName(allItems[i]);
 			if (!allItems[i].att)
 			{
-				cout << setw(10) << allItems[i].size;
+				cout << setw(80 - rd->handleItemName(allItems[i]).size()) << allItems[i].size;
 
 			}
 			cout << endl;
@@ -117,11 +117,31 @@ public:
 		}
 	}
 
+	void deleteItem(File item, int containingFolderCluster)
+	{
+
+		if (item.att)
+		{
+
+			vector<File> subItems = rd->getSubItems(f, *fat, item.firstCluster);
+			for (auto sub : subItems)
+			{
+				deleteItem(sub, item.firstCluster);
+			}
+			rd->deleteItem(f, *fat, item.firstCluster, containingFolderCluster);
+		}
+		else {
+			rd->deleteItemContent(f, *fat, item.firstCluster);
+			rd->deleteItem(f, *fat, item.firstCluster, containingFolderCluster);
+
+		}
+	}
 
 	void showMenu()
 	{
+
 		int choice;
-		int folder = 0;
+		int item = 0;
 		int cluster = 0;
 		vector<int> oldCluster;
 		string path;
@@ -133,35 +153,39 @@ public:
 			cout << "1. Truy cap folder" << endl;
 			cout << "2. Import file/folder vao volume" << endl;
 			cout << "3. Export file/folder" << endl;
-			cout << "4. Quay ve folder truoc" << endl;
+			cout << "4. Xoa item" << endl;
+			cout << "5. Quay ve folder truoc" << endl;
 			do {
 				cout << ">> ";
 				cin >> choice;
 				cin.ignore();
 
-			} while (choice > 4 || choice < 0);
+			} while (choice > 5 || choice < 0);
 
 
 			switch (choice)
 			{
 			case(1):
-
+				if (allItems.size() < 1)
+				{
+					break;
+				}
 				cout << "Chon folder muon truy cap: ";
-				cin >> folder;
+				cin >> item;
 				cin.ignore(1);
-				if (allItems[folder - 1].isPassword)
+				if (allItems[item - 1].isPassword)
 				{
 					string password;
 					cout << "Nhap password cua item: ";
 					getline(cin, password);
-					if (password != allItems[folder - 1].password)
+					if (password != allItems[item - 1].password)
 					{
 						cout << "Sai password!" << endl;
 						break;
 					}
 				}
 				oldCluster.push_back(cluster);
-				cluster = allItems[folder - 1].firstCluster;
+				cluster = allItems[item - 1].firstCluster;
 				system("cls");
 				break;
 
@@ -172,14 +196,14 @@ public:
 
 			case(3):
 				cout << "Chon item muon export: ";
-				cin >> folder;
+				cin >> item;
 				cin.ignore(1);
-				if (allItems[folder - 1].isPassword)
+				if (allItems[item - 1].isPassword)
 				{
 					string password;
 					cout << "Nhap password cua item: ";
 					getline(cin, password);
-					if (password != allItems[folder - 1].password)
+					if (password != allItems[item - 1].password)
 					{
 						cout << "Sai password!" << endl;
 						break;
@@ -188,12 +212,30 @@ public:
 
 				cout << "Nhap duong dan de export: ";
 				getline(cin, path);
-				exportItem(allItems[folder - 1], path);
+				exportItem(allItems[item - 1], path);
 				cout << "Export thanh cong! Nhan phim bat ky de tiep tuc..." << endl;
 				getchar();
 				system("cls");
 				break;
 			case(4):
+				cout << "Chon item muon xoa: ";
+				cin >> item;
+				cin.ignore(1);
+				if (allItems[item - 1].isPassword)
+				{
+					string password;
+					cout << "Nhap password cua item: ";
+					getline(cin, password);
+					if (password != allItems[item - 1].password)
+					{
+						cout << "Sai password!" << endl;
+						break;
+					}
+				}
+				deleteItem(allItems[item - 1], cluster);
+				system("cls");
+				break;
+			case(5):
 				cluster = oldCluster[oldCluster.size() - 1];
 				if (oldCluster.size() > 0)
 					oldCluster.pop_back();
