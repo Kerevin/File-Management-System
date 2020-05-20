@@ -68,10 +68,6 @@ public:
 		// Contrustor tạo volume
 
 		f.open(path, ios::binary | ios::out);
-		if (f.fail())
-		{
-			cout << "Fail to open" << endl;
-		}
 		bs = new BootSector(volSize);
 		this->initializeFile(volSize);
 		bs->createBootSector(f);
@@ -88,11 +84,20 @@ public:
 
 		if (f.fail())
 		{
-			cout << "Fail to open" << endl;
+			cout << "Failed to open" << endl;
+			cout << "Automatically create new volume";
+			f.close();
+			f.open(path, ios::binary | ios::out);
+			this->initializeFile(1);
+			bs->createBootSector(f);
+			f.close();
+			f.open(path, ios::binary | ios::out | ios::in);
 		}
-		bs = new BootSector();
-		bs->readBootSector(f);
+		else {
+			bs = new BootSector();
+			bs->readBootSector(f);
 
+		}
 		rd = new RDET(*bs);
 		fat = new FAT(*bs);
 	}
@@ -103,6 +108,21 @@ public:
 		delete fat;
 		f.close();
 
+	}
+	bool checkFileExists(string dirName)
+	{
+		DWORD attribs = ::GetFileAttributesA(dirName.c_str());
+		if (attribs == INVALID_FILE_ATTRIBUTES) {
+			return false;
+		}
+		return ((attribs & FILE_ATTRIBUTE_DIRECTORY) == 0);
+	}
+	bool checkDirectoryExists(string dirName) {
+		DWORD attribs = ::GetFileAttributesA(dirName.c_str());
+		if (attribs == INVALID_FILE_ATTRIBUTES) {
+			return false;
+		}
+		return (attribs & FILE_ATTRIBUTE_DIRECTORY);
 	}
 	void addItem(int containingFolderCluster, int clusterK)
 	{
@@ -125,17 +145,32 @@ public:
 		cin >> isPassword;
 		cin.ignore(1);
 		int addingSize;
-		if (ch == 1)
+		if (ch == 1)	// Nếu là file
 		{
+			if (!checkFileExists(path))
+			{
+				cout << "Duong dan loi! Khong import file vao duoc..." << endl;
+				cout << "An nut bat ky de tiep tuc" << endl;
+				getchar();
+				return;
+			}
 			WIN32_FIND_DATA fd;
 
 			HANDLE hFind = ::FindFirstFile(path.c_str(), &fd);
 			rd->addItem(f, path, clusterK, false, *fat, isPassword);
 			addingSize = rd->getSubEntry(string(fd.cFileName)).size() + 32;
 		}
-		else {
+		else {	// Nếu là folder
+
+			if (checkDirectoryExists(path))
+				addingSize = rd->getSizeOfFolder(path);
+			else {
+				cout << "Duong dan loi! Khong import folder vao duoc..." << endl;
+				cout << "An nut bat ky de tiep tuc" << endl;
+				getchar();
+				return;
+			}
 			rd->addItem(f, path, clusterK, true, *fat, isPassword);
-			addingSize = rd->getSizeOfFolder(path);
 		}
 		updateFolderSize(containingFolderCluster, clusterK, addingSize);
 	}
@@ -144,16 +179,22 @@ public:
 
 		if (allItems.size() == 0)
 		{
-			cout << "Khong co tap tin" << endl;
+			cout << "Khong co tap tin nao trong nay ca" << endl;
 			return;
 		}
 		for (int i = 0; i < allItems.size(); i++)
 		{
 			cout << i + 1 << ". " << rd->handleItemName(allItems[i]);
+
 			if (!allItems[i].att)
 			{
-				cout << setw(80 - rd->handleItemName(allItems[i]).size()) << allItems[i].size;
 
+				cout << setw(50 - rd->handleItemName(allItems[i]).size()) << allItems[i].extension;
+				cout << setw(20) << allItems[i].size;
+
+			}
+			else {
+				cout << setw(50 - rd->handleItemName(allItems[i]).size()) << "Folder";
 			}
 			cout << endl;
 		}
@@ -202,13 +243,20 @@ public:
 		int currentCluster = 0;	// Cluster của folder hiện tại đang truy vấn
 		vector<int> oldCluster;	// Những cluster của folder trước để BACK
 		string path;
+		string accessingFolderName; // Tên folder đang truy cập
 		while (true)
 		{
 			vector<File> allItems = rd->getSubItems(f, *fat, currentCluster);
+			if (currentCluster == 0)
+			{
+				accessingFolderName = "Folder goc";
+			}
+			cout << "Dang truy cap: " << accessingFolderName << endl << endl;
+
 			showFolder(allItems);
 			cout << endl << "-----------------------------" << endl;
 			cout << "1. Truy cap folder" << endl;
-			cout << "2. Import file/folder vao volume" << endl;
+			cout << "2. Import file/folder vao " << accessingFolderName << endl;
 			cout << "3. Export file/folder" << endl;
 			cout << "4. Xoa item" << endl;
 			cout << "5. Quay ve folder truoc" << endl;
@@ -232,6 +280,13 @@ public:
 					cin >> item;
 					cin.ignore(1);
 				} while (item > allItems.size() || item < 0);
+				if (allItems[item - 1].att == 0)	// Kiểm tra xem item vừa chọn có phải là folder hay không
+				{
+					cout << "Khong phai la folder. Xin vui long chon folder khac!" << endl;
+					getchar();
+					system("cls");
+					break;
+				}
 
 				if (allItems[item - 1].isPassword)
 				{
@@ -245,6 +300,7 @@ public:
 					}
 				}
 				oldCluster.push_back(currentCluster);
+				accessingFolderName = allItems[item - 1].name;
 				currentCluster = allItems[item - 1].firstCluster;
 				system("cls");
 				break;
@@ -260,9 +316,22 @@ public:
 				break;
 
 			case(3):
-				cout << "Chon item muon export: ";
-				cin >> item;
-				cin.ignore(1);
+				do {
+					cout << "Chon item muon export: ";
+					cin >> item;
+					cin.ignore(1);
+				} while (item > allItems.size() || item < allItems.size());
+
+
+				cout << "Nhap duong dan de export: ";
+				getline(cin, path);
+				if (!checkDirectoryExists(path))	// Kiểm tra xem folder hợp lệ hay không
+				{
+					cout << "Vui long chon duong dan khac" << endl;
+					getchar();
+					system("cls");
+					break;
+				}
 				if (allItems[item - 1].isPassword)
 				{
 					string password;
@@ -275,8 +344,8 @@ public:
 					}
 				}
 
-				cout << "Nhap duong dan de export: ";
-				getline(cin, path);
+
+
 				exportItem(allItems[item - 1], path);
 				cout << "Export thanh cong! Nhan phim bat ky de tiep tuc..." << endl;
 				getchar();

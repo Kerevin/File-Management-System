@@ -11,13 +11,13 @@
 using namespace std;
 struct File
 {
-	string name;
-	string extension;
-	int firstCluster;
-	long size;
-	string password = "";
-	bool att;
-	bool isPassword;
+	string name;	// Tên file
+	string extension;	// Đuôi mở rộng
+	int firstCluster;	// cluster đầu
+	long size;		//	Kích thước file, nếu là folder thì là số entry
+	string password = "";	// Password của file
+	bool att;		// Thuộc tính, nếu att == 1 thì là folder, ngược lại là file
+	bool isPassword;	// Kiểm tra có chứa password hay ko
 };
 class RDET
 {
@@ -488,12 +488,9 @@ public:
 			HANDLE hFind = ::FindFirstFile(item.c_str(), &fd);
 			long totalSize = this->getFileSize(fd);
 
-
-
 			if (totalSize / sectorSize < this->remaningSectors)
 			{
 				addFile(f, fd, firstCluster, fat, item, password);
-
 			}
 			else {
 				return;
@@ -506,17 +503,23 @@ public:
 
 	int getCluster(int k) {
 
+		// Lấy vị trí sector của cluster K
 		return this->offset + this->size + (k - 2) * clusterSize;
 	}
 
+
 	long getFileSize(WIN32_FIND_DATA fd)
 	{
+		// Lấy size của 1 file
 		return (fd.nFileSizeHigh * MAXDWORD) + fd.nFileSizeLow;
 	}
 
 	void exportFile(fstream& f, fstream& out, FAT& fat, int clusterK, long fileSize)
 	{
-		vector<int> allClusters = fat.getItemClusters(f, clusterK);
+		// Export một file ra ngoài 
+
+
+		vector<int> allClusters = fat.getItemClusters(f, clusterK);		// Lấy các cluster của file
 		int currentOffset;
 		char temp[1024];
 		for (int i = 0; i < allClusters.size() - 1; i++)	// Chạy tới cluster thứ n - 1
