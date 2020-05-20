@@ -46,17 +46,42 @@ private:
 
 		cout << "Dang ghi file: " << shortName << "cluster thu: " << pivotCluster << ", getCluster: " << getCluster(pivotCluster) << endl;
 
+		string fullName = file.cFileName;
+		string subEntry;
+		if (fullName.size() > 8) // Nếu tên dài hơn 8 ký tự sẽ phát sinh entry phụ
+		{
+
+			subEntry = getSubEntry(fullName);
+		}
 		// Kiếm chỗ trống để ghi Entry
 		char currentValue[2]; // Giá trị ở vị trí currentOffset
+
 		while (currentOffset < limitSize && !emptyEntry)
 		{
 			f.seekg(currentOffset, ios::beg);
 
-			f.read((char*)&currentValue, 1);
+			f.read(currentValue, 1);
 			currentValue[1] = '\0';
 			if (string(currentValue) == "") // Phát hiện có chỗ trống
 			{
 				emptyEntry = true;
+
+				// Kiểm tra xem Entry đó có đủ chứa entry phụ của item hay không?
+				for (int of = currentOffset + 32; of <= currentOffset + subEntry.size(); of += 32)
+				{
+
+					f.seekp(of, ios::beg);
+					f.read(currentValue, 1);
+					currentValue[1] = '\0';
+
+					if (string(currentValue) != "")
+					{
+						emptyEntry = false;
+						currentOffset += 32;
+						break;
+					}
+				}
+
 			}
 			else
 			{
@@ -66,6 +91,7 @@ private:
 
 		}
 		long sizeItem = getFileSize(file);
+
 		if (!sizeItem) // Nếu là folder
 		{
 			cout << "Size của folder: " << this->getSizeOfFolder(path) << endl;
@@ -82,9 +108,9 @@ private:
 		// Ghi thông tin file vào Entry
 		if (emptyEntry)
 		{
-			fat.writeFAT(f, availableClusters);
+			fat.writeFAT(f, availableClusters);	// Ghi tất cả cluster của file vào FAT
 
-			// Nếu không phải folder thì ghi nội dung của file vào vùng DATA
+			// Nếu là file thì ghi nội dung vào vùng DATA
 			if (!(file.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY))
 				writeFileContent(f, availableClusters, path, sizeItem);
 
@@ -93,20 +119,12 @@ private:
 			f.seekg(currentOffset, ios::beg);
 
 
-			string fullName = file.cFileName; // Lấy tên full (loại bỏ file đuôi) 
-
-			if (fullName.size() > 8) // Nếu tên dài hơn 8 ký tự sẽ phát sinh entry phụ
+			// Ghi entry phụ vào file
+			for (int i = 0; i < subEntry.size(); i += 32)
 			{
-				string subEntry = getSubEntry(fullName);
-
-				// Ghi entry phụ vào file
-				for (int i = 0; i < subEntry.size(); i += 32)
-				{
-					char temp[33]; // mảng char tạm để chép nội dung string sang char
-					strcpy_s(temp, subEntry.substr(i, i + 32).c_str());
-					f.write((char*)&temp, 32);
-				}
-
+				char temp[33]; // mảng char tạm để chép nội dung string sang char
+				strcpy_s(temp, subEntry.substr(i, i + 32).c_str());
+				f.write((char*)&temp, 32);
 			}
 
 			char temp[27];	 // mảng char tạm để chép nội dung string sang char
@@ -235,7 +253,6 @@ private:
 	}
 
 
-
 public:
 	RDET(BootSector& bs)
 	{
@@ -247,11 +264,15 @@ public:
 		this->totalEmptyCluster = (bs.getVolumeSize() - (size + offset)) / 8; // Cluster trống = sector của volume - size RDET - sector trước RDET 
 
 	}
-
+	int getTotalEmptyCluster()
+	{
+		return this->totalEmptyCluster;
+	}
 	string handleItemName(File n)
 	{
+
 		string newName = n.name;
-		while (newName[newName.size() - 1] == ' ')
+		while (newName[newName.size() - 1] == ' ' && newName.size() > 0)
 		{
 			newName.pop_back();
 		}
@@ -356,7 +377,7 @@ public:
 		if (hFind != INVALID_HANDLE_VALUE) {
 			do {
 				{
-					//cout << "Name: " << fd.cFileName << ", size: " << (fd.nFileSizeHigh * MAXDWORD) + fd.nFileSizeLow << endl;;
+
 					if (strcmp(fd.cFileName, ".") && strcmp(fd.cFileName, ".."))
 						if (fd.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)
 						{
@@ -392,7 +413,7 @@ public:
 	long getTotalSize(string path)
 	{
 		// Lấy tổng kích thước của folder
-
+		// Return bytes
 
 		vector<string> folderName;
 		vector<WIN32_FIND_DATA> fileName;
@@ -433,12 +454,12 @@ public:
 		return size;
 	}
 
-	void addItem(fstream& f, string item, bool isFolder, FAT& fat, bool isPassword)
+	void addItem(fstream& f, string item, int firstCluster, bool isFolder, FAT& fat, bool isPassword)
 	{
 		/*Hàm thêm một item vào vol
 		isFolder: True nếu item dc thêm vào là 1 folder, ngược lại là thêm vào 1 file
 		isPassword: True nếu người dùng muốn đặt password cho file, folder
-
+		firstCluster: cluster của folder chứa item đó
 		*/
 		string password = "";
 		if (isPassword)
@@ -453,7 +474,7 @@ public:
 		{
 			long totalSize = getTotalSize(item);
 			if (totalSize / sectorSize < this->remaningSectors)
-				addFolder(f, item, 0, fat, password);
+				addFolder(f, item, firstCluster, fat, password);
 			else {
 				cout << "Khong du dung luong" << endl;
 				return;
@@ -466,9 +487,12 @@ public:
 
 			HANDLE hFind = ::FindFirstFile(item.c_str(), &fd);
 			long totalSize = this->getFileSize(fd);
+
+
+
 			if (totalSize / sectorSize < this->remaningSectors)
 			{
-				addFile(f, fd, 0, fat, item, password);
+				addFile(f, fd, firstCluster, fat, item, password);
 
 			}
 			else {
@@ -573,7 +597,7 @@ public:
 
 		this->remaningSectors += allClusters.size() * clusterSize;
 		f.seekg(0x40, ios::beg);
-		f.write((char*)remaningSectors, 4);
+		f.write((char*)&remaningSectors, 4);
 
 
 	}
@@ -634,14 +658,7 @@ public:
 			folderOffset += 32;
 
 		}
-		/*for (auto cluster : allClusters)
-		{
-			int currentOffset = this->getCluster(cluster) * sectorSize;
-			f.seekg(currentOffset, ios::beg);
-			char buffer[27];
-			f.read(buffer, 26);
 
-		}*/
 
 	}
 
@@ -675,6 +692,8 @@ public:
 					item += temp.substr(2);
 				}
 				else if (temp != "") {
+					if (item.size() == 0)	// Nếu tên nhỏ hơn 8 ký tự thì không có entry phụ nên đó là tên của item
+						item = temp.substr(0, 8);
 
 					f.read((char*)&firstCluster, 2);
 					f.read((char*)&sizeF, 4);
