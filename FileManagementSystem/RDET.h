@@ -44,15 +44,15 @@ private:
 		bool emptyEntry = false;
 
 
-		cout << "Dang ghi file: " << shortName << "cluster thu: " << pivotCluster << ", getCluster: " << getCluster(pivotCluster) << endl;
+	//	cout << "Dang ghi file: " << shortName << "cluster thu: " << pivotCluster << ", getCluster: " << getCluster(pivotCluster) << endl;
 
 		string fullName = file.cFileName;
 		string subEntry;
-		if (fullName.size() > 8) // Nếu tên dài hơn 8 ký tự sẽ phát sinh entry phụ
-		{
 
-			subEntry = getSubEntry(fullName);
-		}
+		subEntry = getSubEntry(fullName);
+		
+		//cout << "Subentry: " << subEntry << endl;
+
 		// Kiếm chỗ trống để ghi Entry
 		char currentValue[2]; // Giá trị ở vị trí currentOffset
 
@@ -94,13 +94,13 @@ private:
 
 		if (!sizeItem) // Nếu là folder
 		{
-			cout << "Size của folder: " << this->getSizeOfFolder(path) << endl;
+			//cout << "Size của folder: " << this->getSizeOfFolder(path) << endl;
 			sizeItem = this->getSizeOfFolder(path);
 		}
 
 		vector<int> availableClusters = fat.findEmptyOffsets(f, file, sizeItem);	// Các cluster trống phù hợp cho file
 
-		cout << "So cluster phai ghi vao: " << availableClusters.size() << endl;
+		//cout << "So cluster phai ghi vao: " << availableClusters.size() << endl;
 
 		this->remaningSectors -= availableClusters.size() * clusterSize;
 
@@ -114,7 +114,7 @@ private:
 			if (!(file.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY))
 				writeFileContent(f, availableClusters, path, sizeItem);
 
-			cout << "GHI VAO OFFSET: " << currentOffset << ", file: " << file.cFileName << endl;
+			//cout << "GHI VAO OFFSET: " << currentOffset << ", file: " << file.cFileName << endl;
 			// Nhảy tới vị trí thích hợp của entry
 			f.seekg(currentOffset, ios::beg);
 
@@ -123,7 +123,7 @@ private:
 			for (int i = 0; i < subEntry.size(); i += 32)
 			{
 				char temp[33]; // mảng char tạm để chép nội dung string sang char
-				strcpy_s(temp, subEntry.substr(i, i + 32).c_str());
+				strcpy_s(temp, subEntry.substr(i, 32).c_str());
 				f.write((char*)&temp, 32);
 			}
 
@@ -157,7 +157,7 @@ private:
 		WIN32_FIND_DATA fd;
 
 		HANDLE hFind = ::FindFirstFile(folder.c_str(), &fd);
-		cout << "Hello, folder: " << fd.cFileName << "-----------------" << endl;
+		//cout << "Hello, folder: " << fd.cFileName << "-----------------" << endl;
 		addFile(f, fd, startCluster, fat, folder, password);
 
 		f.seekp(-6, ios::cur);	// Nhảy tới vị trí cluster đầu
@@ -165,7 +165,7 @@ private:
 
 		short firstClusterOfFoler;
 		f.read((char*)&firstClusterOfFoler, 2);
-		cout << "Cluter bd: " << firstClusterOfFoler << ", offset" << f.tellg() << endl;
+		//cout << "Cluter bd: " << firstClusterOfFoler << ", offset" << f.tellg() << endl;
 
 
 		getAllItemsWithinFolder(f, folder, firstClusterOfFoler, fat, "");
@@ -173,8 +173,6 @@ private:
 
 	string getFileExtension(string fileName)
 	{
-
-		transform(fileName.begin(), fileName.end(), fileName.begin(), ::toupper); // In hoa chữ cái
 		if (fileName.rfind('.') >= 0)
 			return fileName.substr(fileName.rfind('.') + 1);
 		else return "";
@@ -209,7 +207,7 @@ private:
 	void writeFileContent(fstream& volume, vector<int> clustersOffset, string path, long fileSize)
 	{
 		fstream file(path, ios::binary | ios::in);
-		cout << "FILE PATH: " << path << endl;
+		//cout << "FILE PATH: " << path << endl;
 
 		char temp[1024];
 		for (int i = 0; i < clustersOffset.size() - 1; i++)
@@ -268,6 +266,7 @@ public:
 	{
 		return this->totalEmptyCluster;
 	}
+
 	string handleItemName(File n)
 	{
 
@@ -327,7 +326,7 @@ public:
 		else
 		{
 			n += fileName.substr(0, 30);
-			string m = fileName.substr(29, fileName.length());
+			string m = fileName.substr(30, fileName.length());
 			n = getSubEntry(m) + n;
 
 		}
@@ -396,6 +395,7 @@ public:
 			for (int i = 0; i < fileName.size(); i++)
 			{
 				// Ghi nội dung của file
+				
 				addFile(f, fileName[i], pivotOffset, fat, folder + "/" + string(fileName[i].cFileName), password);
 
 			}
@@ -518,7 +518,7 @@ public:
 	{
 		// Export một file ra ngoài 
 
-
+		//cout << "Exporting"  << endl;
 		vector<int> allClusters = fat.getItemClusters(f, clusterK);		// Lấy các cluster của file
 		int currentOffset;
 		char temp[1024];
@@ -530,7 +530,6 @@ public:
 			int k = 1;	// Số cluster đã đọc được
 			while (f.read(temp, 1024) && k * 1024 < clusterSize * sectorSize)
 			{
-
 				out.write(temp, f.gcount());
 				k++;
 			}
@@ -566,9 +565,9 @@ public:
 	void exportFolder(fstream& f, string path, FAT& fat, File folder)
 	{
 		folder.name = handleItemName(folder);
-		string p = path + folder.name;
+		string p = path + "/"+folder.name;
 		_mkdir(p.c_str());
-		cout << "PATH: " << p << endl;
+	//	cout << "PATH: " << p << endl;
 		vector<File> items = getSubItems(f, fat, folder.firstCluster);
 		for (auto x : items)
 		{
@@ -610,8 +609,8 @@ public:
 		vector<int> allClusters = fat.getItemClusters(f, clusterK);
 		fat.deleteItem(f, clusterK);
 		int folderOffset;	// Offset của folder chứa item đó
-		cout << "CLUSTER bat dau: " << clusterK << endl;
-		cout << "CLuster cua folder chua no: " << folderCluster << endl;
+		//cout << "CLUSTER bat dau: " << clusterK << endl;
+		//cout << "CLuster cua folder chua no: " << folderCluster << endl;
 		if (folderCluster == 0)	// File nằm ở bảng rdet
 		{
 			folderOffset = this->offset * sectorSize;
@@ -623,7 +622,7 @@ public:
 			folderOffset = this->getCluster(folderCluster) * sectorSize;
 		}
 
-		cout << "Folder offset: " << folderOffset << ", cluster size:" << allClusters.size() << endl;
+		//cout << "Folder offset: " << folderOffset << ", cluster size:" << allClusters.size() << endl;
 		vector<int> clusterOfSubEntry;
 		while (f.tellg() < (this->getCluster(folderCluster) + clusterSize) * sectorSize - 32)
 		{
@@ -642,8 +641,7 @@ public:
 				f.read((char*)&firstCluster, 2);
 
 				if (firstCluster == clusterK)	// Kiểm tra xem phải item mình tìm hay không
-				{
-					cout << "ZO: " << firstCluster << endl;
+				{				
 					f.seekg(-28, ios::cur);
 					int temp[8] = { 0 };
 					f.write((char*)temp, 32);
@@ -695,9 +693,6 @@ public:
 					item += temp.substr(2);
 				}
 				else if (temp != "") {
-					if (item.size() == 0)	// Nếu tên nhỏ hơn 8 ký tự thì không có entry phụ nên đó là tên của item
-						item = temp.substr(0, 8);
-
 					f.read((char*)&firstCluster, 2);
 					f.read((char*)&sizeF, 4);
 					File file;

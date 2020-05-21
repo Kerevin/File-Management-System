@@ -127,10 +127,10 @@ public:
 	void addItem(int containingFolderCluster, int clusterK)
 	{
 		cout << "IMPORT ITEM" << endl;
-		cout << "IMPORT vào cluster: " << clusterK << endl;
+
 		int ch;
 		do {
-			cout << "Chon import file hay folder(1: file, 2: folder): ";
+			cout << "Chon import file hay folder (1: file, 2: folder): ";
 			cin >> ch;
 
 		} while (ch != 1 && ch != 2);
@@ -179,23 +179,38 @@ public:
 
 		if (allItems.size() == 0)
 		{
-			cout << "Khong co tap tin nao trong nay ca" << endl;
+			cout << "Folder rong" << endl;
 			return;
 		}
 		for (int i = 0; i < allItems.size(); i++)
 		{
-			cout << i + 1 << ". " << rd->handleItemName(allItems[i]);
-
+			//cout << i + 1 << ". " << rd->handleItemName(allItems[i]);
+			
+			string display = to_string(i +1) + ". " +  rd->handleItemName(allItems[i]);
+			for (int i = display.size(); i < 70; i ++ )
+			{
+				display+=" ";
+			}
+			
+			
 			if (!allItems[i].att)
 			{
-
-				cout << setw(50 - rd->handleItemName(allItems[i]).size()) << allItems[i].extension;
-				cout << setw(20) << allItems[i].size;
-
+				display += allItems[i].extension;
+				//cout << setw(67 - rd->handleItemName(allItems[i]).size() - to_string(i).size() + 1) << allItems[i].extension;
+				//cout << setw(25) << allItems[i].size;s
 			}
 			else {
-				cout << setw(50 - rd->handleItemName(allItems[i]).size()) << "Folder";
+				///cout << setw(70 - rd->handleItemName(allItems[i]).size() - to_string(i).size() + 1) << "Folder";
+				display += "Folder";
 			}
+
+			for (int i = display.size(); i < 95; i++)
+			{
+				display += " ";
+			}
+			if (!allItems[i].att)
+				display += to_string(allItems[i].size);
+			cout << display;
 			cout << endl;
 		}
 
@@ -209,7 +224,14 @@ public:
 			rd->exportFolder(f, path_out, *fat, item);
 		}
 		else {
-			fstream out(path_out, ios::out | ios::binary);
+			fstream out(path_out + "/" + item.name, ios::out | ios::binary);
+			cout <<"NAME: " << item.name << endl;
+			if (out.fail())
+			{
+				cout <<"Khong mo file duoc" << endl;
+				out.close();
+				return;
+			}
 			rd->exportFile(f, out, *fat, item.firstCluster, item.size);
 			out.close();
 		}
@@ -220,7 +242,6 @@ public:
 
 		if (item.att)
 		{
-
 			vector<File> subItems = rd->getSubItems(f, *fat, item.firstCluster);
 			for (auto sub : subItems)
 			{
@@ -252,7 +273,7 @@ public:
 				accessingFolderName = "Folder goc";
 			}
 			cout << "Dang truy cap: " << accessingFolderName << endl << endl;
-
+			cout <<"Name" << setw(70) << "Type" << setw(33) << "Size (Bytes)" << endl;
 			showFolder(allItems);
 			cout << endl << "-----------------------------" << endl;
 			cout << "1. Truy cap folder" << endl;
@@ -290,12 +311,15 @@ public:
 
 				if (allItems[item - 1].isPassword)
 				{
+				
 					string password;
 					cout << "Nhap password cua item: ";
 					getline(cin, password);
 					if (password != allItems[item - 1].password)
 					{
 						cout << "Sai password!" << endl;
+						getchar();
+						system("cls");
 						break;
 					}
 				}
@@ -312,7 +336,7 @@ public:
 				{
 					addItem(0, currentCluster);
 				}
-				system("cls");
+				//system("cls");
 				break;
 
 			case(3):
@@ -320,7 +344,7 @@ public:
 					cout << "Chon item muon export: ";
 					cin >> item;
 					cin.ignore(1);
-				} while (item > allItems.size() || item < allItems.size());
+				} while (item > allItems.size() || item <0);
 
 
 				cout << "Nhap duong dan de export: ";
@@ -343,9 +367,6 @@ public:
 						break;
 					}
 				}
-
-
-
 				exportItem(allItems[item - 1], path);
 				cout << "Export thanh cong! Nhan phim bat ky de tiep tuc..." << endl;
 				getchar();
@@ -370,9 +391,13 @@ public:
 				system("cls");
 				break;
 			case(5):
-				currentCluster = oldCluster[oldCluster.size() - 1];
+				
 				if (oldCluster.size() > 0)
+				{
+					currentCluster = oldCluster[oldCluster.size() - 1];
 					oldCluster.pop_back();
+				}
+					
 				system("cls");
 				break;
 

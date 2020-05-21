@@ -1,26 +1,24 @@
 ﻿  main.cpp
-D:\Coding\HeDieuHanh\FileManagementSystem\FileManagementSystem\BootSector.h(42,18): warning C4244: '=': conversion from 'float' to 'int', possible loss of data
-D:\Coding\HeDieuHanh\FileManagementSystem\FileManagementSystem\BootSector.h(52,21): warning C4018: '<': signed/unsigned mismatch
-D:\Coding\HeDieuHanh\FileManagementSystem\FileManagementSystem\BootSector.h(69,21): warning C4018: '<': signed/unsigned mismatch
-D:\Coding\HeDieuHanh\FileManagementSystem\FileManagementSystem\FAT.h(47,18): warning C4018: '<=': signed/unsigned mismatch
-D:\Coding\HeDieuHanh\FileManagementSystem\FileManagementSystem\FAT.h(65,22): warning C4018: '<': signed/unsigned mismatch
-D:\Coding\HeDieuHanh\FileManagementSystem\FileManagementSystem\RDET.h(97,12): warning C4566: character represented by universal-character-name '\u1EE7' cannot be represented in the current code page (1258)
-D:\Coding\HeDieuHanh\FileManagementSystem\FileManagementSystem\RDET.h(70,42): warning C4018: '<=': signed/unsigned mismatch
-D:\Coding\HeDieuHanh\FileManagementSystem\FileManagementSystem\RDET.h(123,22): warning C4018: '<': signed/unsigned mismatch
-D:\Coding\HeDieuHanh\FileManagementSystem\FileManagementSystem\RDET.h(190,60): warning C4018: '<': signed/unsigned mismatch
-D:\Coding\HeDieuHanh\FileManagementSystem\FileManagementSystem\RDET.h(215,21): warning C4018: '<': signed/unsigned mismatch
-D:\Coding\HeDieuHanh\FileManagementSystem\FileManagementSystem\RDET.h(396,22): warning C4018: '<': signed/unsigned mismatch
-D:\Coding\HeDieuHanh\FileManagementSystem\FileManagementSystem\RDET.h(402,22): warning C4018: '<': signed/unsigned mismatch
-D:\Coding\HeDieuHanh\FileManagementSystem\FileManagementSystem\RDET.h(442,22): warning C4018: '<': signed/unsigned mismatch
-D:\Coding\HeDieuHanh\FileManagementSystem\FileManagementSystem\RDET.h(448,22): warning C4018: '<': signed/unsigned mismatch
-D:\Coding\HeDieuHanh\FileManagementSystem\FileManagementSystem\RDET.h(522,21): warning C4018: '<': signed/unsigned mismatch
-D:\Coding\HeDieuHanh\FileManagementSystem\FileManagementSystem\RDET.h(787,21): warning C4018: '<': signed/unsigned mismatch
-D:\Coding\HeDieuHanh\FileManagementSystem\FileManagementSystem\RDET.h(804,16): warning C4018: '>': signed/unsigned mismatch
-D:\Coding\HeDieuHanh\FileManagementSystem\FileManagementSystem\RDET.h(819,16): warning C4018: '>': signed/unsigned mismatch
-D:\Coding\HeDieuHanh\FileManagementSystem\FileManagementSystem\RDET.h(783,7): warning C4101: 'sizeF': unreferenced local variable
-D:\Coding\HeDieuHanh\FileManagementSystem\FileManagementSystem\RDET.h(784,9): warning C4101: 'firstCluster': unreferenced local variable
-D:\Coding\HeDieuHanh\FileManagementSystem\FileManagementSystem\FileManagement.h(185,21): warning C4018: '<': signed/unsigned mismatch
-D:\Coding\HeDieuHanh\FileManagementSystem\FileManagementSystem\FileManagement.h(282,19): warning C4018: '>': signed/unsigned mismatch
-D:\Coding\HeDieuHanh\FileManagementSystem\FileManagementSystem\FileManagement.h(323,19): warning C4018: '>': signed/unsigned mismatch
-D:\Coding\HeDieuHanh\FileManagementSystem\FileManagementSystem\FileManagement.h(323,45): warning C4018: '<': signed/unsigned mismatch
-  FileManagementSystem.vcxproj -> D:\Coding\HeDieuHanh\FileManagementSystem\Debug\FileManagementSystem.exe
+D:\Coding\HeDieuHanh\File-Management-System\FileManagementSystem\BootSector.h(42,18): warning C4244: '=': conversion from 'float' to 'int', possible loss of data
+D:\Coding\HeDieuHanh\File-Management-System\FileManagementSystem\BootSector.h(52,21): warning C4018: '<': signed/unsigned mismatch
+D:\Coding\HeDieuHanh\File-Management-System\FileManagementSystem\BootSector.h(69,21): warning C4018: '<': signed/unsigned mismatch
+D:\Coding\HeDieuHanh\File-Management-System\FileManagementSystem\FAT.h(47,18): warning C4018: '<=': signed/unsigned mismatch
+D:\Coding\HeDieuHanh\File-Management-System\FileManagementSystem\FAT.h(65,22): warning C4018: '<': signed/unsigned mismatch
+D:\Coding\HeDieuHanh\File-Management-System\FileManagementSystem\RDET.h(70,42): warning C4018: '<=': signed/unsigned mismatch
+D:\Coding\HeDieuHanh\File-Management-System\FileManagementSystem\RDET.h(123,22): warning C4018: '<': signed/unsigned mismatch
+D:\Coding\HeDieuHanh\File-Management-System\FileManagementSystem\RDET.h(188,60): warning C4018: '<': signed/unsigned mismatch
+D:\Coding\HeDieuHanh\File-Management-System\FileManagementSystem\RDET.h(213,21): warning C4018: '<': signed/unsigned mismatch
+D:\Coding\HeDieuHanh\File-Management-System\FileManagementSystem\RDET.h(395,22): warning C4018: '<': signed/unsigned mismatch
+D:\Coding\HeDieuHanh\File-Management-System\FileManagementSystem\RDET.h(402,22): warning C4018: '<': signed/unsigned mismatch
+D:\Coding\HeDieuHanh\File-Management-System\FileManagementSystem\RDET.h(442,22): warning C4018: '<': signed/unsigned mismatch
+D:\Coding\HeDieuHanh\File-Management-System\FileManagementSystem\RDET.h(448,22): warning C4018: '<': signed/unsigned mismatch
+D:\Coding\HeDieuHanh\File-Management-System\FileManagementSystem\RDET.h(525,21): warning C4018: '<': signed/unsigned mismatch
+D:\Coding\HeDieuHanh\File-Management-System\FileManagementSystem\RDET.h(785,21): warning C4018: '<': signed/unsigned mismatch
+D:\Coding\HeDieuHanh\File-Management-System\FileManagementSystem\RDET.h(802,16): warning C4018: '>': signed/unsigned mismatch
+D:\Coding\HeDieuHanh\File-Management-System\FileManagementSystem\RDET.h(817,16): warning C4018: '>': signed/unsigned mismatch
+D:\Coding\HeDieuHanh\File-Management-System\FileManagementSystem\RDET.h(781,7): warning C4101: 'sizeF': unreferenced local variable
+D:\Coding\HeDieuHanh\File-Management-System\FileManagementSystem\RDET.h(782,9): warning C4101: 'firstCluster': unreferenced local variable
+D:\Coding\HeDieuHanh\File-Management-System\FileManagementSystem\FileManagement.h(185,21): warning C4018: '<': signed/unsigned mismatch
+D:\Coding\HeDieuHanh\File-Management-System\FileManagementSystem\FileManagement.h(303,19): warning C4018: '>': signed/unsigned mismatch
+D:\Coding\HeDieuHanh\File-Management-System\FileManagementSystem\FileManagement.h(347,19): warning C4018: '>': signed/unsigned mismatch
+  FileManagementSystem.vcxproj -> D:\Coding\HeDieuHanh\File-Management-System\Debug\FileManagementSystem.exe
