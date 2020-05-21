@@ -62,7 +62,7 @@ public:
 
 
 		if (clusters.size() > 1)
-			for (int i = 1; i < clusters.size() - 1; ++i)
+			for (int i = 1; i < clusters.size(); ++i)
 			{
 				f.seekg(currentOffset, ios::beg);
 				clusters[i] = (clusters[i] - 1) * 2;	// offset trong bảng FAT của cluster k = (cluster k - 1 ) * 2
