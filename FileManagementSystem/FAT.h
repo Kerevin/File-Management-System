@@ -21,13 +21,10 @@ public:
 		this->clusterSize = bs.getClusterSector(); // Số sector của cluster
 		this->totalEmptyCluster = bs.getVolumeSize() - size - offset * sectorSize; // Cluster trống = sector của volume - size RDET - sector trước RDET
 	}
-
 	int getCluster(int k) {
 
 		return this->offset + this->size + (k - 2) * clusterSize;
 	}
-
-
 	vector<int> findEmptyOffsets(fstream& f, WIN32_FIND_DATA file, long sizeFize)
 	{
 		int currentOffset = this->offset * sectorSize + 2;	// Offset bắt đầu của bảng FAT, tính bằng bytes
@@ -55,7 +52,6 @@ public:
 
 		return emptyOffset;
 	}
-
 	void writeFAT(fstream& f, vector<int> clusters)
 	{
 		int currentOffset = this->offset * sectorSize + (clusters[0] - 1) * 2; // Vị trí hiện tại để theo dõi giá trị trong bảng FAT
@@ -75,7 +71,6 @@ public:
 		f.write((char*)&eof, 2);
 
 	}
-
 	vector<int> getItemClusters(fstream& f, int clusterK)
 	{
 
@@ -110,7 +105,6 @@ public:
 
 		return cluster;
 	}
-
 	void deleteItem(fstream& f, int clusterK)
 	{
 		vector<int> allClusters = getItemClusters(f, clusterK);

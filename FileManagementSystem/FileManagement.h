@@ -65,7 +65,7 @@ private:
 public:
 	FileManagement(long volSize, string path)
 	{
-		// Contrustor tạo volume
+		// Contrustor tạo volume mới
 
 		f.open(path, ios::binary | ios::out);
 		bs = new BootSector(volSize);
@@ -130,14 +130,18 @@ public:
 
 		int ch;
 		do {
-			cout << "Chon import file hay folder (1: file, 2: folder): ";
+			cout << "Chon import file hay folder (1: file, 2: folder, 0: quay lai): ";
 			cin >> ch;
 
-		} while (ch != 1 && ch != 2);
+		} while (ch > 2 || ch < 0);
+
 		string path;
 		bool isPassword;
-
 		cin.ignore(1);
+		if (ch == 0)
+		{
+			return;
+		}
 		cout << "Chon duong dan: ";
 		getline(cin, path);
 
@@ -181,25 +185,22 @@ public:
 		{
 			return;
 		}
+
 		for (int i = 0; i < allItems.size(); i++)
 		{
-			//cout << i + 1 << ". " << rd->handleItemName(allItems[i]);
-			
-			string display = to_string(i +1) + ". " +  rd->handleItemName(allItems[i]);
-			for (int i = display.size(); i < 70; i ++ )
+
+			string display = to_string(i + 1) + ". " + rd->handleItemName(allItems[i]);
+			for (int i = display.size(); i < 70; i++)
 			{
-				display+=" ";
+				display += " ";
 			}
-			
-			
+
+
 			if (!allItems[i].att)
 			{
 				display += allItems[i].extension;
-				//cout << setw(67 - rd->handleItemName(allItems[i]).size() - to_string(i).size() + 1) << allItems[i].extension;
-				//cout << setw(25) << allItems[i].size;s
 			}
 			else {
-				///cout << setw(70 - rd->handleItemName(allItems[i]).size() - to_string(i).size() + 1) << "Folder";
 				display += "Folder";
 			}
 
@@ -209,8 +210,8 @@ public:
 			}
 			if (!allItems[i].att)
 				display += to_string(allItems[i].size);
-			cout << display;
-			cout << endl;
+			cout << display << endl;
+
 		}
 
 
@@ -224,18 +225,23 @@ public:
 		}
 		else {
 			fstream out(path_out + "/" + item.name, ios::out | ios::binary);
-			cout <<"NAME: " << item.name << endl;
+
 			if (out.fail())
 			{
-				cout <<"Khong mo file duoc" << endl;
+				cout << "Loi export file: " << item.name << endl;
 				out.close();
 				return;
 			}
-			rd->exportFile(f, out, *fat, item.firstCluster, item.size);
+			try {
+				rd->exportFile(f, out, *fat, item.firstCluster, item.size);
+			}
+			catch (char* e)
+			{
+				cout << "Khong the export: " << item.name << endl;
+			}
 			out.close();
 		}
 	}
-
 	void deleteItem(File item, int containingFolderCluster)
 	{
 
@@ -272,7 +278,8 @@ public:
 				accessingFolderName = "Folder goc";
 			}
 			cout << "Dang truy cap: " << accessingFolderName << endl << endl;
-			cout <<"Name" << setw(70) << "Type" << setw(33) << "Size (Bytes)" << endl;
+
+			cout << "Name" << setw(70) << "Type" << setw(33) << "Size (Bytes)" << endl;
 			showFolder(allItems);
 			cout << endl << "-----------------------------" << endl;
 			cout << "1. Truy cap folder" << endl;
@@ -296,10 +303,15 @@ public:
 					break;
 				}
 				do {
-					cout << "Chon folder muon truy cap: ";
+					cout << "Chon folder muon truy cap (0 de quay lai): ";
 					cin >> item;
 					cin.ignore(1);
 				} while (item > allItems.size() || item < 0);
+				if (item == 0)
+				{
+					system("cls");
+					break;
+				}
 				if (allItems[item - 1].att == 0)	// Kiểm tra xem item vừa chọn có phải là folder hay không
 				{
 					cout << "Khong phai la folder. Xin vui long chon folder khac!" << endl;
@@ -310,7 +322,7 @@ public:
 
 				if (allItems[item - 1].isPassword)
 				{
-				
+
 					string password;
 					cout << "Nhap password cua item: ";
 					getline(cin, password);
@@ -323,7 +335,7 @@ public:
 					}
 				}
 				oldCluster.push_back(currentCluster);
-				accessingFolderName = allItems[item - 1].name;
+				accessingFolderName = allItems[item - 1].name;		// Ghi lại tên của folder đang truy cập
 				currentCluster = allItems[item - 1].firstCluster;
 				system("cls");
 				break;
@@ -335,7 +347,7 @@ public:
 				{
 					addItem(0, currentCluster);
 				}
-				//system("cls");
+				system("cls");
 				break;
 
 			case(3):
@@ -343,17 +355,14 @@ public:
 					cout << "Chon item muon export: ";
 					cin >> item;
 					cin.ignore(1);
-				} while (item > allItems.size() || item <0);
+				} while (item > allItems.size() || item < 0);
 
 
 				cout << "Nhap duong dan de export: ";
 				getline(cin, path);
 				if (!checkDirectoryExists(path))	// Kiểm tra xem folder hợp lệ hay không
 				{
-					cout << "Vui long chon duong dan khac" << endl;
-					getchar();
-					system("cls");
-					break;
+					_mkdir(path.c_str());
 				}
 				if (allItems[item - 1].isPassword)
 				{
@@ -368,7 +377,7 @@ public:
 					}
 				}
 				exportItem(allItems[item - 1], path);
-				cout << "Export thanh cong! Nhan phim bat ky de tiep tuc..." << endl;
+				cout << "Nhan phim bat ky de tiep tuc..." << endl;
 				getchar();
 				system("cls");
 				break;
@@ -392,13 +401,11 @@ public:
 				system("cls");
 				break;
 			case(5):
-				
 				if (oldCluster.size() > 0)
 				{
 					currentCluster = oldCluster[oldCluster.size() - 1];
 					oldCluster.pop_back();
 				}
-					
 				system("cls");
 				break;
 

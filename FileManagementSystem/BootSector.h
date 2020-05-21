@@ -43,8 +43,6 @@ public:
 		currentVolSector = volSector - fatSize - bootSize - ((entrySizeRDET * 32) / sectorSize);
 
 	}
-
-
 	void createBootSector(fstream& f)
 	{
 		writeContent = { sectorSize, 'TSER',clusterSectors, bootSize, entrySizeRDET, fatSize, volSector, 2314885625596363078 /*Fat 16 */, currentVolSector, 43605 /*kết thúc boot sector*/ };
@@ -55,7 +53,6 @@ public:
 			f.write((char*)&writeContent[i], this->numBytesWritten[i]);	// Lưu giá trị quan trọng
 		}
 	}
-
 	void readBootSector(fstream& f)
 	{
 		int writePosition[] = { 0xB, 0xD, 0xE,0x16, 0x20, 0x40 };
@@ -77,9 +74,6 @@ public:
 
 
 	}
-
-
-
 	int getVolumeSize()
 	{
 		return this->volSector;
@@ -92,28 +86,22 @@ public:
 	{
 		return this->bootSize + fatSize;
 	}
-
 	int getRDETSize()
 	{
 		return ((entrySizeRDET * 32) / sectorSize);
 	}
-
 	int getFATOffset()
 	{
 		return bootSize;
 	}
-
-
 	int getSectorSize()
 	{
 		return sectorSize;
 	}
-
 	int getFATSize()
 	{
 		return fatSize;
 	}
-
 	int getCurrentSize()
 	{
 		return currentVolSector;
