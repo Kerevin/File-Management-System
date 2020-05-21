@@ -149,7 +149,7 @@ private:
 			f.clear();
 			return;
 		}
-		cout << endl;
+
 	}
 
 	void addFolder(fstream& f, string folder, int startCluster, FAT& fat, string password)

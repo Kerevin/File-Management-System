@@ -18,7 +18,7 @@ D:\Coding\HeDieuHanh\File-Management-System\FileManagementSystem\RDET.h(802,16):
 D:\Coding\HeDieuHanh\File-Management-System\FileManagementSystem\RDET.h(817,16): warning C4018: '>': signed/unsigned mismatch
 D:\Coding\HeDieuHanh\File-Management-System\FileManagementSystem\RDET.h(781,7): warning C4101: 'sizeF': unreferenced local variable
 D:\Coding\HeDieuHanh\File-Management-System\FileManagementSystem\RDET.h(782,9): warning C4101: 'firstCluster': unreferenced local variable
-D:\Coding\HeDieuHanh\File-Management-System\FileManagementSystem\FileManagement.h(185,21): warning C4018: '<': signed/unsigned mismatch
-D:\Coding\HeDieuHanh\File-Management-System\FileManagementSystem\FileManagement.h(303,19): warning C4018: '>': signed/unsigned mismatch
-D:\Coding\HeDieuHanh\File-Management-System\FileManagementSystem\FileManagement.h(347,19): warning C4018: '>': signed/unsigned mismatch
+D:\Coding\HeDieuHanh\File-Management-System\FileManagementSystem\FileManagement.h(184,21): warning C4018: '<': signed/unsigned mismatch
+D:\Coding\HeDieuHanh\File-Management-System\FileManagementSystem\FileManagement.h(302,19): warning C4018: '>': signed/unsigned mismatch
+D:\Coding\HeDieuHanh\File-Management-System\FileManagementSystem\FileManagement.h(346,19): warning C4018: '>': signed/unsigned mismatch
   FileManagementSystem.vcxproj -> D:\Coding\HeDieuHanh\File-Management-System\Debug\FileManagementSystem.exe

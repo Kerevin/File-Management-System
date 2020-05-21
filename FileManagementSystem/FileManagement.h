@@ -179,7 +179,6 @@ public:
 
 		if (allItems.size() == 0)
 		{
-			cout << "Folder rong" << endl;
 			return;
 		}
 		for (int i = 0; i < allItems.size(); i++)
@@ -364,6 +363,7 @@ public:
 					if (password != allItems[item - 1].password)
 					{
 						cout << "Sai password!" << endl;
+						system("cls");
 						break;
 					}
 				}
@@ -384,6 +384,7 @@ public:
 					if (password != allItems[item - 1].password)
 					{
 						cout << "Sai password!" << endl;
+						system("cls");
 						break;
 					}
 				}
